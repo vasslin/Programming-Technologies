@@ -1,0 +1,42 @@
+#!/bin/bash
+
+input_dir="$1"
+output_dir="$2"
+numb=0
+touch names.txt
+
+
+function search {
+    for file in "$1"/*; do
+        if [ -d "$file" ]; then
+            search "$file" "$2"
+        elif [ -f "$file" ]; then
+            name=$(basename -- "$file")
+            name1="$name"
+            while [ -e "$2/$name1" ]; do
+                numb=$((numb + 1))
+                name1="${name}_${numb}"
+            done
+            cp "$file" "$2/$name1"
+	    echo "$name1" >> names.txt
+        fi
+    done
+}
+
+# проверяем существование входной директории:
+if [ ! -d "$input_dir" ]; then
+    echo "Директории $input_dir не существует"
+    exit 1
+fi
+
+# проверяем существование выходной директории (если ее нет, создаем ее)
+if [ -d "$output_dir" ]; then
+    echo "Output directory is $output_dir"
+else 
+    echo "The directory $output_dir doesn't exist"
+    echo "Creating new directory $output_dir"
+    mkdir -p "$output_dir"
+fi
+
+search "$input_dir" "$output_dir"
+
